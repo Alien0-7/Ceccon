@@ -1,9 +1,3 @@
-# CONNESSIONE RETE WIFI CON RASPBERRY PICO W
-# SCRIPT DI TEST CON VISUALIZZAZIONI DI STATO
-#
-# SCRIPT: pico1.py
-#
-import rp2                    # Funzioni e classi specifiche per RP2040 - Raspberry Pi Pico
 import network
 import ubinascii              # Conversions between binary data and various encodings of it in ASCII form
 import machine                # Funzioni relative all'HW utilizzato
@@ -18,32 +12,32 @@ def Parametri_WiFi():
     return ssid,pasw
 #
 def Disabilita_PowerSaving_Mode(wlan):
-    wlan.config(pm = 0xa11140)
+    wlan.config(pm = wlan.PM_NONE) # Disabilita Power Saving Mode per migliorare la stabilità della connessione WiFi
 #
 def Connessione_WiFi(wlan, time_out, ssid, psw, pausa):
-   wlan.connect(ssid, psw)
-   print("Tentativi (attesa): ", time_out)
-   while time_out > 0:
-       if wlan.status() < 0 or wlan.status() >= 3:
-           break
-       time_out = time_out - 1
-       print("Tentativo connessione")
-       time.sleep(pausa)
-       
+    wlan.connect(ssid, psw)
+    print("Tentativi (attesa):", time_out)
+    while time_out > 0:
+        if wlan.isconnected():
+            break
+        time_out = time_out - 1
+        print("Tentativo connessione")
+        time.sleep(pausa)
+
    # Gestione errore
-   if wlan.status() != 3:
+    if not(wlan.isconnected()):
+        print('Impossibile connettersi alla rete WiFi, errore:', wlan.status())
         while True:
             Errore_con_lampeggio_led(wlan.status())
-   else:
+    else:
         print('Connessione riuscita')
         status = wlan.ifconfig()
         print(status)
         ip_assegnato = status[0]
-        print("IP Pico: ", ip_assegnato)
-   return
+        print("IP ESP32: ", ip_assegnato)
 #
 def Errore_con_lampeggio_led(num_lampeggi):
-    led = machine.Pin('LED', machine.Pin.OUT)
+    led = machine.Pin(2, machine.Pin.OUT)
     for i in range(num_lampeggi):
         led.on()
         time.sleep(.2)

@@ -4,19 +4,18 @@ Allegro Elena, Morari Elia
 
 Script dc.py
 '''
-import socket
 import time
+import socket
 import sys
 import json
 import misurazione_dht
 import wifidc
-import rp2
+import esp
 import network
 
 file_wifi = open("wifipico.json")
 dict_wifi = json.load(file_wifi)
 
-rp2.country('IT')                    # Disponibili i canali wifi Italia per evitare possibili errori
 wlan = network.WLAN(network.STA_IF)  # Interfaccia modalità stazione per connessione a un AP
 wlan.active(True)                    # Attiva interfaccia WiFi
 #wlan = network.WLAN(network.AP_IF)  # Interfaccia mdalità AP per altri raspberry Pico W
@@ -25,7 +24,7 @@ wifidc.Disabilita_PowerSaving_Mode(wlan)
 ssid, psw = wifidc.Parametri_WiFi()
 
 wifidc.Connessione_WiFi(wlan, 10, ssid, psw, 1)
-
+print("CONNESSO AL WIFI:\n SSID:",ssid,"\n PSW:",psw)
 file_info_socket = open("da.json")
 dict_info_socket = json.load(file_info_socket)
 
@@ -42,6 +41,7 @@ except Exception as errore: # socket.error da l'errore: "AttributeError: 'module
     sys.exit()
 
 try:
+    print("[DEBUG] Connessione a:",hostname, "porta:",portasocket)
     clientsocket.connect((hostname, portasocket))
 
 except Exception as errore: # socket.error da l'errore: "AttributeError: 'module' object has no attribute 'error'"
@@ -58,7 +58,7 @@ file_conf = open("configurazionedc.json")
 dict_conf = json.load(file_conf)
 
 try:
-    clientsocket.send("getTempoRilevazione".encode())
+    clientsocket.send("getTempoRilevazione\n".encode())
     tempo_raw = clientsocket.recv(4096).decode(FORMAT)
     try:
         TEMPO_RILEVAZIONE = int(tempo_raw)
@@ -81,7 +81,7 @@ try:
         }
         
         dati_json = json.dumps(dati)
-        dati_b = dati_json.encode(FORMAT)
+        dati_b = (dati_json+"\n").encode(FORMAT)
         
         clientsocket.send(dati_b)
         time.sleep(TEMPO_RILEVAZIONE)

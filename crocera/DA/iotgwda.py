@@ -35,8 +35,8 @@ TEMPO_RILEVAZIONE = dict["TEMPO_RILEVAZIONE"]
 FORMAT = 'UTF-8'
 
 # Client 
-hostname = "127.0.0.1"
-portasocket = 9091
+hostnameServer = "127.0.0.1"
+portasocketServer = 9091
 famiglia = socket.AF_INET
 tipo = socket.SOCK_STREAM
 bufferdati = 64
@@ -48,20 +48,20 @@ except socket.error as errore:
     sys.exit()
 
 try:
-    clientsocket.connect((hostname,portasocket))
+    clientsocket.connect((hostnameServer,portasocketServer))
 
 except socket.error as errore:
     print(f"Errore creazione connessione con l'archivio IOTP... \n{errore}")
     sys.exit()
 
 FORMAT = 'UTF-8'
-TEMPO_RILEVAZIONE = 0
+TEMPO_RILEVAZIONE = 3
 N_DECIMALI = 2
-
+stop_thread = threading.Event()
 
 def calcola_media(tempo_invio):
     invionumero = 1
-    while True:
+    while not stop_thread.is_set():
         time.sleep(tempo_invio * 60)
 
         dati_ricevuti_copia = json.loads(json.dumps(dati_ricevuti)) # per evitare RuntimeError: dictionary changed size during iteration
@@ -108,7 +108,8 @@ def calcola_media(tempo_invio):
                     
             except Exception:
                 print("ERRORE")
-                sys.exit()
+                stop_thread.set()
+                return
 
         '''
             #TEMPORANEO
@@ -123,6 +124,8 @@ def calcola_media(tempo_invio):
 try:
     t = threading.Thread(target=calcola_media, args=(dict["TEMPO_INVIO"],))
     t.daemon = True
+    t.start()
+
     while True:
         print("----------------------------------------------")
         print("Server in ascolto su porta: ", portasocket)
@@ -131,24 +134,45 @@ try:
         client_soc,indirizzo = serversocket.accept()
         print("Indirizzo DC: ", indirizzo)
         ricezione = 0
-        t.start()
+        dati = ""
+
         try:
 
             while True:
-                dati = client_soc.recv(bufferdati).decode(FORMAT)
+                dati_part = client_soc.recv(bufferdati).decode(FORMAT)
+                dati += dati_part
+                print("[DEBUG] Dati parziali ricevuti:\n", dati_part)
+
+                if not dati_part:
+                    print("Connessione chiusa dal client")
+                    stop_thread.set()
+                    t.join()
+                    break
+
+                if "\n" not in dati:
+                    continue
                 
-                if dati == "getTempoRilevazione":
+                linea, dati = dati.split("\n", 1)
+                print("[DEBUG] Linea ricevuta:\n", linea)
+                if linea == "getTempoRilevazione":
                     string = str(TEMPO_RILEVAZIONE).encode(FORMAT)
                     client_soc.send(string)
                 
-                elif dati == "close" or dati == "":
+                elif linea == "close":
+                    stop_thread.set()
+                    t.join()
                     break
+                    
                 
                 else:
-                    ricezione += 1
-                    print("[DEBUG]", "Ricezione dati n.",ricezione,":\n", json.dumps(json.loads(dati), indent=4, sort_keys=True))
-                    dati_ricevuti[ricezione] = json.loads(dati)
-
+                    try:
+                        ricezione += 1
+                        print("[DEBUG]", "Ricezione dati n.",ricezione,":\n", json.dumps(json.loads(linea), indent=4, sort_keys=True))
+                        dati_ricevuti[ricezione] = json.loads(linea)
+                    except Exception as error:
+                        print("Errore decodifica dati ricevuti:\n", linea)
+                        stop_thread.set()
+                        t.join()
         except KeyboardInterrupt:
             print("Stop forzata server")
             print("Misurazioni ricevute:",ricezione)
