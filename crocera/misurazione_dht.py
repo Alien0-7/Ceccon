@@ -1,3 +1,9 @@
+'''
+Allegro Elena, Morari Elia 
+5AI
+
+Script misurazione_dht.py 
+'''
 # DA ESEGUIRE USANDO L'ESTENSIONE MicroPico su visual studio code
 
 import time

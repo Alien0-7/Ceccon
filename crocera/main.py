@@ -2,7 +2,7 @@
 Allegro Elena, Morari Elia 
 5AI
 
-Script dc.py
+Script dc.py --> diventa main.py così che il MCU quando viene collegato parta già da solo
 '''
 import time
 import socket
@@ -13,7 +13,7 @@ import wifidc
 import esp
 import network
 
-file_wifi = open("wifipico.json")
+file_wifi = open("wifipico.json")  # Parametri del Wifi (nome e password)
 dict_wifi = json.load(file_wifi)
 
 wlan = network.WLAN(network.STA_IF)  # Interfaccia modalità stazione per connessione a un AP

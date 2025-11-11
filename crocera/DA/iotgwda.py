@@ -11,6 +11,7 @@ import sys
 import time
 import cripto
 
+# Creazione server DA 
 f = open("parametri.json")
 dict = json.load(f)
 
@@ -34,7 +35,7 @@ serversocket.listen(maxconnessionicoda)          # attesa connessioni al socket
 TEMPO_RILEVAZIONE = dict["TEMPO_RILEVAZIONE"]
 FORMAT = 'UTF-8'
 
-# Client 
+# Creazione client per permettere il collegamento con "archivia_iotp.py" 
 hostnameServer = "127.0.0.1"
 portasocketServer = 9091
 famiglia = socket.AF_INET
