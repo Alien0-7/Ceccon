@@ -7,7 +7,7 @@ Script archivia_iotp.py
 import socket
 import json
 import sys
-from DA import cripto
+from DA import cripto   # Modulo cripto usato anche dal DA 
 
 hostname = "127.0.0.1"              # Indirizzo IP del server Archivio
 portaserver = 9091                  # Porta server Archivio
@@ -23,7 +23,7 @@ serversocket.listen(maxconnessionicoda)          # attesa connessioni al socket
 
 FORMAT = 'UTF-8'
 
-ricezione = 0                       # Variabile che serve per sapere quante volte riceve i dati 
+ricezione = 0       # Variabile che conta i messaggi ricevuti
 
 try:
     while True:
@@ -37,14 +37,18 @@ try:
         try:
 
             while True:
+                
                 # Dato del DA criptato
                 dato_iot_dc_json_criptato = clientDA_soc.recv(bufferdati).decode(FORMAT)   
                 
                 # Dato del DA decriptato
-                dato_iot_dc_json = cripto.decriptazione(json.dumps(dato_iot_dc_json_criptato, sort_keys=True))
+                dato_iot_dc_json = cripto.decriptazione(dato_iot_dc_json_criptato)
+
+                # Converte il dato da JSON in un dizionario
+                dato_dict = json.loads(dato_iot_dc_json)
 
                 with open("iotdata.dbt", "a") as f:
-                    f.write(json.dumps(dato_iot_dc_json, sort_keys=True))
+                    f.write(json.dumps(dato_dict, sort_keys=True), "\n")
                 
                 ricezione += 1  
 

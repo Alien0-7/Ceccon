@@ -10,9 +10,10 @@ import sys
 import json
 import misurazione_dht
 import wifidc
-import esp
+import esp         # Libreria per gestire la MCU ESP32
 import network
 
+# Parametri della rete Wifi
 file_wifi = open("wifipico.json")  # Parametri del Wifi (nome e password)
 dict_wifi = json.load(file_wifi)
 
@@ -23,13 +24,17 @@ wifidc.Disabilita_PowerSaving_Mode(wlan)
 
 ssid, psw = wifidc.Parametri_WiFi()
 
+# Connessione alla rete Wifi
 wifidc.Connessione_WiFi(wlan, 10, ssid, psw, 1)
 print("CONNESSO AL WIFI:\n SSID:",ssid,"\n PSW:",psw)
-file_info_socket = open("da.json")
+
+file_info_socket = open("da.json") # File con all'interno l'IP e la porta del DA
 dict_info_socket = json.load(file_info_socket)
 
 hostname = dict_info_socket["IP"]
 portasocket = dict_info_socket["porta"]
+
+# Parametri per la comunicazione TCP
 famiglia = socket.AF_INET
 tipo = socket.SOCK_STREAM
 bufferdati = 64
@@ -40,6 +45,7 @@ except Exception as errore: # socket.error da l'errore: "AttributeError: 'module
     print(f"Errore creazione socket... \n{errore}")
     sys.exit()
 
+# Tentativo di connessione al DA
 try:
     print("[DEBUG] Connessione a:",hostname, "porta:",portasocket)
     clientsocket.connect((hostname, portasocket))
@@ -50,16 +56,16 @@ except Exception as errore: # socket.error da l'errore: "AttributeError: 'module
 
 FORMAT = 'UTF-8'
 TEMPO_RILEVAZIONE = 0
-N_DECIMALI = 2
+N_DECIMALI = 2   # Numero di decimali per le misurazioni
 
-letture = 0
+letture = 0   # Contatore delle letture effettuate
 
-file_conf = open("configurazionedc.json")
+file_conf = open("configurazionedc.json")   # File per la configurazione del DC
 dict_conf = json.load(file_conf)
 
 try:
     clientsocket.send("getTempoRilevazione\n".encode())
-    tempo_raw = clientsocket.recv(4096).decode(FORMAT)
+    tempo_raw = clientsocket.recv(4096).decode(FORMAT) # Attende la risposta del DA
     try:
         TEMPO_RILEVAZIONE = int(tempo_raw)
         print("[DEBUG]", "tempo rilevazione ricevuto dal server:",TEMPO_RILEVAZIONE)
@@ -70,7 +76,9 @@ try:
 
     while True:
         letture += 1
-        temperatura, umidita = misurazione_dht.leggi()
+
+        temperatura, umidita = misurazione_dht.leggi() # Lettura sensore DHT
+        
         print("[DEBUG]", "Invio da DC1 temperatura n.",letture,":", temperatura)
         print("[DEBUG]", "Invio da DC1 umidità n.",letture,":", umidita)
 
@@ -80,14 +88,14 @@ try:
         "osservazione": {"RILEVAZIONE": letture, "TEMP": temperatura, "UMID": umidita}
         }
         
-        dati_json = json.dumps(dati)
-        dati_b = (dati_json+"\n").encode(FORMAT)
+        dati_json = json.dumps(dati) # Conversione in stringa JSON
+        dati_b = (dati_json+"\n").encode(FORMAT) # "\n" per segnalare la fine del messaggio
         
         clientsocket.send(dati_b)
-        time.sleep(TEMPO_RILEVAZIONE)
+        time.sleep(TEMPO_RILEVAZIONE) # Attesa prima della prossima rilevazione
 
 except KeyboardInterrupt:
-        clientsocket.send("close".encode(FORMAT))
+        clientsocket.send("close".encode(FORMAT)) # Avvisa il DA di chiudere la connessione
         clientsocket.close()
         print ("Stop forzato")
 

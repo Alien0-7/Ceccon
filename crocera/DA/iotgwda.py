@@ -12,7 +12,7 @@ import time
 import cripto
 
 # Creazione server DA 
-f = open("parametri.json")
+f = open("parametri.json")  
 dict = json.load(f)
 
 f_da = open("../da.json")
@@ -48,6 +48,7 @@ except socket.error as errore:
     print(f"Errore creazione socket per invio dati all'archivio IOTP... \n{errore}")
     sys.exit()
 
+# Tentativo di connessione con l'archivio IOTP
 try:
     clientsocket.connect((hostnameServer,portasocketServer))
 
@@ -57,17 +58,19 @@ except socket.error as errore:
 
 FORMAT = 'UTF-8'
 TEMPO_RILEVAZIONE = 3
-N_DECIMALI = 2
+N_DECIMALI = 2    # Numero di decimali nelle medie
 stop_thread = threading.Event()
 
+# Funzione che calcola periodicamente la media di temperatura e umidità
 def calcola_media(tempo_invio):
     invionumero = 1
+
     while not stop_thread.is_set():
-        time.sleep(tempo_invio * 60)
+        time.sleep(tempo_invio * 60) # Attesa tra un invio e l'altro
 
         dati_ricevuti_copia = json.loads(json.dumps(dati_ricevuti)) # per evitare RuntimeError: dictionary changed size during iteration
 
-        # il set contiene SOLO valori diversi (unici) tra loro
+        # Il set contiene SOLO valori diversi (unici) tra loro
         identita_dc_unici = set(d["identita_dc"] for d in dati_ricevuti_copia.values())
 
         for identita_dc in identita_dc_unici:
@@ -100,28 +103,24 @@ def calcola_media(tempo_invio):
                 "identita_dc": identita_dc
             }
 
+            print("[DEBUG]: Dato DC da criptare:\n" ,dato_iot_dc_json,"\n")
 
+            # Criptazione del dato tramite la funzione "criptazione" del file "cripto.py"
             dato_iot_dc_json_criptato = cripto.criptazione(json.dumps(dato_iot_dc_json, indent=4, sort_keys=True))
 
+            print("[DEBUG]: Dato DC criptato:\n" ,dato_iot_dc_json_criptato,"/n")
+            
+            # Invio dei dati all'archivio IOTP
             try:
-                clientsocket.send(dato_iot_dc_json_criptato.encode())
+                clientsocket.send(dato_iot_dc_json_criptato.encode(FORMAT))
                 invionumero += 1
                     
             except Exception:
-                print("ERRORE")
+                print("ERRORE durante l'invio dei dati criptati")
                 stop_thread.set()
                 return
 
-        '''
-            #TEMPORANEO
-            #dovrebbe mandare i dati criptati allo iotp
-            with open("iotdata.dbt", "a") as f:
-                f.write(json.dumps(dato_iot_dc_json, sort_keys=True))
 
-            with open("iotdata_criptato.dbt", "a") as f:
-                f.write(dato_iot_dc_json_criptato)
-        '''
-        
 try:
     t = threading.Thread(target=calcola_media, args=(dict["TEMPO_INVIO"],))
     t.daemon = True
@@ -132,6 +131,7 @@ try:
         print("Server in ascolto su porta: ", portasocket)
         print("----------------------------------------------\n")
 
+        # Attesa di connessione da un DC 
         client_soc,indirizzo = serversocket.accept()
         print("Indirizzo DC: ", indirizzo)
         ricezione = 0
@@ -144,12 +144,14 @@ try:
                 dati += dati_part
                 print("[DEBUG] Dati parziali ricevuti:\n", dati_part)
 
+                # Se il client chiude la connessione
                 if not dati_part:
                     print("Connessione chiusa dal client")
                     stop_thread.set()
                     t.join()
                     break
 
+                # Se non è ancora arrivato "\n", continua
                 if "\n" not in dati:
                     continue
                 
@@ -166,6 +168,7 @@ try:
                     
                 
                 else:
+                    # Ricezione dati dal sensore
                     try:
                         ricezione += 1
                         print("[DEBUG]", "Ricezione dati n.",ricezione,":\n", json.dumps(json.loads(linea), indent=4, sort_keys=True))
