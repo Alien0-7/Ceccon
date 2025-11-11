@@ -142,7 +142,7 @@ try:
             while True:
                 dati_part = client_soc.recv(bufferdati).decode(FORMAT)
                 dati += dati_part
-                print("[DEBUG] Dati parziali ricevuti:\n", dati_part)
+                # print("[DEBUG] Dati parziali ricevuti:\n", dati_part)
 
                 # Se il client chiude la connessione
                 if not dati_part:
@@ -156,7 +156,7 @@ try:
                     continue
                 
                 linea, dati = dati.split("\n", 1)
-                print("[DEBUG] Linea ricevuta:\n", linea)
+                # print("[DEBUG] Linea ricevuta:\n", linea)
                 if linea == "getTempoRilevazione":
                     string = str(TEMPO_RILEVAZIONE).encode(FORMAT)
                     client_soc.send(string)
