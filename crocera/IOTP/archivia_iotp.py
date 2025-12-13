@@ -47,6 +47,7 @@ try:
                 # Converte il dato da JSON in un dizionario
                 dato_dict = json.loads(dato_iot_dc_json)
 
+                # Il dato decriptato viene scritto in un file 
                 with open("IOTP/iotdata.dbt", "a") as f:
                     f.write(json.dumps(dato_dict, sort_keys=True) + "\n")
                 
