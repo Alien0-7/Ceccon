@@ -1,0 +1,12 @@
+{
+	"TEMPO_RILEVAZIONE": 5,
+	"N_DECIMALI": 2,
+	"IDENTITA_DA": "GIOT-1",
+	"TEMPO_INVIO": 2,
+	"IP_SERVER": "127.0.0.1",
+	"PORTA_SERVER": 9999,
+	"TOPIC": "iotnavi/GIOT-1/misure",
+	"BROKER": "broker.hivemq.com",
+	"PORTA_BROKER": 1883,
+	"CODICE": "108EX"
+}
