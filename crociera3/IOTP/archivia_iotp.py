@@ -75,7 +75,8 @@ def on_connectIOT(client, userdata, flags, reasone_code, properties):
 # Decodifica del payload 
 def on_messageIOT(client, userdata, msg):
     dato = msg.payload.decode(FORMAT)
-    archivia.archivia(dict_db["file"], dict_db["modo"], dato)
+    dato_decriptato= cripto.decriptazione(dato)
+    archivia.archivia(dict_db["file"], dict_db["modo"], dato_decriptato)
 
 def on_messageHeartbeat(client, userdata, msg):
     global last_message_time
