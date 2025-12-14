@@ -1,5 +1,5 @@
 {
-    "topic":"iotnavi/+/misure",
+    "topic":"iotnavi/GIOT-3/misure",
     "broker": {
         "host": "broker.hivemq.com",
         "porta": 1883

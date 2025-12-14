@@ -21,7 +21,7 @@ try:
         dati,indirizzo_client = socketUDP.recvfrom(1024)         # ricezione dati dal client
         print ("Ricezione:",dati.decode()," da: ",indirizzo_client)
         # Utilizzo la funzione archivia per salvare il messaggio nel file "heartbeat.log"
-        archivia("heartbeat.log", "a", dati.decode()+"\n")
+        archivia.archivia("heartbeat.log", "a", dati.decode()+"\n")
         
 except KeyboardInterrupt:
     print ("Chiusura server")

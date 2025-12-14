@@ -8,12 +8,12 @@ import time
 import socket
 import sys
 import json
-import misurazione
-import wifidc
-import esp         # Libreria per gestire la MCU ESP32
-import network
+#import misurazione
+#import wifidc
+#import esp         # Libreria per gestire la MCU ESP32
+#import network
 
-# Parametri della rete Wifi
+"""# Parametri della rete Wifi
 file_wifi = open("wifipico.json")  # Parametri del Wifi (nome e password)
 dict_wifi = json.load(file_wifi)
 
@@ -27,7 +27,7 @@ ssid, psw = wifidc.Parametri_WiFi()
 # Connessione alla rete Wifi
 wifidc.Connessione_WiFi(wlan, 10, ssid, psw, 1)
 print("CONNESSO AL WIFI:\n SSID:",ssid,"\n PSW:",psw)
-
+"""
 file_info_socket = open("da.json") # File con all'interno l'IP e la porta del DA
 dict_info_socket = json.load(file_info_socket)
 
@@ -78,7 +78,7 @@ try:
     while True:
         letture += 1
 
-        temperatura, umidita = misurazione.leggi() # Lettura sensore DHT
+        temperatura, umidita = 10, 10 #misurazione.leggi() # Lettura sensore DHT
         
         print("[DEBUG]", "Invio da DC1 temperatura n.",letture,":", temperatura)
         print("[DEBUG]", "Invio da DC1 umidità n.",letture,":", umidita)
