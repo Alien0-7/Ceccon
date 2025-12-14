@@ -31,7 +31,7 @@ QOS = 0
 FORMAT = 'UTF-8'
 ricezione = 0  # Variabile che conta i messaggi ricevuti
 TT = 1.75  # Coefficiente di tolleranza ai guasti
-HEARTBEAT_TIMEOUT = TEMPO_INVIO * 5 * TT
+HEARTBEAT_TIMEOUT = TEMPO_INVIO * 60 * TT
 
 def controllore(socketUDP, udp_host, udp_port):
     global last_message_time
@@ -75,13 +75,18 @@ def on_connectIOT(client, userdata, flags, reasone_code, properties):
 # Decodifica del payload 
 def on_messageIOT(client, userdata, msg):
     dato = msg.payload.decode(FORMAT)
-    dato_decriptato= cripto.decriptazione(dato)
-    archivia.archivia(dict_db["file"], dict_db["modo"], dato_decriptato)
+    dato_decriptato = cripto.decriptazione(dato)
+    archivia.archivia(dict_db["file"], dict_db["modo"], str(dato_decriptato+"\n"))
+    print("[DEBUG]: misura ricevuta, aggiornato il file dbt")
+    print("----------------------------------------------\n")
+    print("Messaggio ricevuto nel topic:", msg.topic)
+    print("Payload:", cripto.decriptazione(msg.payload.decode(FORMAT)))
+    print("----------------------------------------------\n")
 
 def on_messageHeartbeat(client, userdata, msg):
     global last_message_time
     last_message_time = time.time()   # Aggiorna il timestamp
-    print("[DEBUG]: Heartbeat ricevuto, aggiornato il timestamp.\n")
+    print("[DEBUG]: Heartbeat ricevuto, aggiornato il timestamp")
     print("----------------------------------------------\n")
     print("Messaggio ricevuto nel topic:", msg.topic)
     print("Payload:", msg.payload.decode(FORMAT))
@@ -95,7 +100,7 @@ last_message_time = time.time()
 subscriberHeartbeat = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 subscriberHeartbeat.on_message = on_messageHeartbeat
 subscriberHeartbeat.connect(dict["broker"]["host"], dict["broker"]["porta"], KEEPALIVE)
-subscriberHeartbeat.subscribe("iotnavi/GIOT-3/heartbeat", QOS)
+subscriberHeartbeat.subscribe("iotnavi/GIOT-EliaMorari/heartbeat", QOS)
 
 # Subscriber che riceve i messaggi che invia il DA nel topic
 subscriberIOT = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)

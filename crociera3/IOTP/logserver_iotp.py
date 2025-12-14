@@ -18,10 +18,17 @@ socketUDP.bind((udp_host,udp_port))
 print ("Attesa client...")
 try:
     while True:
-        dati,indirizzo_client = socketUDP.recvfrom(1024)         # ricezione dati dal client
-        print ("Ricezione:",dati.decode()," da: ",indirizzo_client)
-        # Utilizzo la funzione archivia per salvare il messaggio nel file "heartbeat.log"
-        archivia.archivia("heartbeat.log", "a", dati.decode()+"\n")
+        try:
+            dati,indirizzo_client = socketUDP.recvfrom(1024)         # ricezione dati dal client
+            print ("Ricezione:",dati.decode()," da: ",indirizzo_client)
+            # Utilizzo la funzione archivia per salvare il messaggio nel file "heartbeat.log"
+            archivia.archivia("heartbeat.log", "a", dati.decode()+"\n")
+        
+        except KeyboardInterrupt:
+            print ("Chiusura server")
+
+        finally:
+            socketUDP.close()
         
 except KeyboardInterrupt:
     print ("Chiusura server")
