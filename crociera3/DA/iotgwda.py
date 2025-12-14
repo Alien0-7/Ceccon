@@ -4,6 +4,7 @@ Allegro Elena, Morari Elia
 
 Script iotgwda.py (publisher)
 '''
+from datetime import datetime, timezone
 import socket
 import threading
 import json
@@ -34,7 +35,7 @@ serversocket = socket.socket(famiglia,tipo)      # creazione socket IP/stream di
 serversocket.bind((hostname, portasocket))       # lega il socket a IP/porta mediante una tuple
 serversocket.listen(maxconnessionicoda)          # attesa connessioni al socket
 
-# MQTT --> connessione con Archivia_iotp 
+# MQTT --> connessione con Archivia_iotp e per heartbeat 
 KEEPALIVE = 60
 QOS = 0
 
@@ -78,14 +79,23 @@ def calcola_media(tempo_invio):
             if ricezioni == 0:
                 continue
 
+            # Struttura del dato che viene inviato 
             dato_iot_dc_json = {
-                "nave": "CrocieraCeccon",
+                "nave": {
+                    "nome": "Rocinante",
+                    "cabine": 15,
+                    "passeggeri": 30,
+                    "equipaggio": 6,
+                    "ponti": 3,
+                    "spazi": 2,
+                    "codice": "108EX"
+                },
                 "invionumero": invionumero,
                 "cabina": cabina,
                 "ponte": ponte,
                 "temperaturam": round(temp_media / ricezioni, dict["N_DECIMALI"]),
                 "umiditam": round(umid_media / ricezioni, dict["N_DECIMALI"]),
-                "dataeora": time.time() * 1000,
+                "dataeora": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "identita_da": dict["IDENTITA_DA"],
                 "identita_dc": identita_dc
             }
@@ -100,7 +110,7 @@ def calcola_media(tempo_invio):
             # Invio dei dati all'archivio IOTP
             try:
                 RETAIN = False
-                client.publish(dict["TOPIC"], dato_iot_dc_json_criptato.encode(FORMAT), QOS, RETAIN)
+                client.publish(dict["TOPIC"], dato_iot_dc_json_criptato.encode(FORMAT), QOS, RETAIN) # Publisher
                 invionumero += 1
                     
             except Exception:
@@ -108,11 +118,44 @@ def calcola_media(tempo_invio):
                 stop_thread.set()
                 return
 
+# Funzione per creare ed inviare l'heartbeat a "archivia_iotp.py"       
+def invio_heartbeat():
+    while not stop_thread.is_set(): 
+
+        # Struttura del dato dell'heartbeat
+        dati= {
+            "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 
+            "identita_da": dict["IDENTITA_DA"],
+            "codice": "108EX",
+            "stato": "ONLINE"
+        } 
+
+        dati_heartbeat_json = json.dumps(dati)
+
+        # Invio del messaggio di heartbeat via MQTT
+        try:
+            client.publish(dict["TOPIC"], dati_heartbeat_json.encode(FORMAT), QOS, False) # Publisher
+
+        except Exception as e:
+            print("Errore durante l'invio del heartbeat: " , e)
+            stop_thread.set()
+            return             
+
+        time.sleep(dict["TEMPO_INVIO"] * 60)
+
+# Main 
 
 try:
-    t = threading.Thread(target=calcola_media, args=(dict["TEMPO_INVIO"],))
-    t.daemon = True
-    t.start()
+
+    # Creo thread per eseguire la funzione "invio_heartbeat"
+    t_heartbeat = threading.Thread(target= invio_heartbeat)
+    t_heartbeat.daemon = True
+    t_heartbeat.start()
+
+    # Creo thread per eseguire la funzione "calcola_media"
+    t_media = threading.Thread(target= calcola_media, args=(dict["TEMPO_INVIO"],))
+    t_media.daemon = True
+    t_media.start()
 
     while True:
         print("----------------------------------------------")
@@ -135,7 +178,7 @@ try:
                 if not dati_part:
                     print("Connessione chiusa dal client")
                     stop_thread.set()
-                    t.join()
+                    t_media.join()
                     break
 
                 # Se non è ancora arrivato "\n", continua
@@ -150,25 +193,26 @@ try:
                 
                 elif linea == "close":
                     stop_thread.set()
-                    t.join()
+                    t_media.join()
                     break
                     
-                
                 else:
                     # Ricezione dati dal sensore
                     try:
                         ricezione += 1
                         print("[DEBUG]", "Ricezione dati n.",ricezione,":\n", json.dumps(json.loads(linea), indent=4, sort_keys=True))
                         dati_ricevuti[ricezione] = json.loads(linea)
+
                     except Exception as error:
+
                         print("Errore decodifica dati ricevuti:\n", linea)
                         stop_thread.set()
-                        t.join()
+                        t_media.join()
+
         except KeyboardInterrupt:
             print("Stop forzata server")
             print("Misurazioni ricevute:",ricezione)
             break
-
 
 except KeyboardInterrupt:
     print("Stop forzata server")
