@@ -8,13 +8,13 @@ import time
 import socket
 import sys
 import json
-#import misurazione
-#import wifidc
-#import esp         # Libreria per gestire la MCU ESP32
-#import network
+import misurazione
+import wifidc
+import esp         # Libreria per gestire la MCU ESP32
+import network
 
-"""# Parametri della rete Wifi
-file_wifi = open("wifipico.json")  # Parametri del Wifi (nome e password)
+# Parametri della rete Wifi
+file_wifi = open("wifipico.conf")  # Parametri del Wifi (nome e password)
 dict_wifi = json.load(file_wifi)
 
 wlan = network.WLAN(network.STA_IF)  # Interfaccia modalità stazione per connessione a un AP
@@ -27,8 +27,8 @@ ssid, psw = wifidc.Parametri_WiFi()
 # Connessione alla rete Wifi
 wifidc.Connessione_WiFi(wlan, 10, ssid, psw, 1)
 print("CONNESSO AL WIFI:\n SSID:",ssid,"\n PSW:",psw)
-"""
-file_info_socket = open("da.json") # File con all'interno l'IP e la porta del DA
+
+file_info_socket = open("da.conf") # File con all'interno l'IP e la porta del DA
 dict_info_socket = json.load(file_info_socket)
 
 hostname = dict_info_socket["IP"]
@@ -61,7 +61,7 @@ N_DECIMALI = 2   # Numero di decimali per le misurazioni
 
 letture = 0   # Contatore delle letture effettuate
 
-file_conf = open("configurazionedc.json")   # File per la configurazione del DC
+file_conf = open("configurazionedc.conf")   # File per la configurazione del DC
 dict_conf = json.load(file_conf)
 
 try:
@@ -78,7 +78,7 @@ try:
     while True:
         letture += 1
 
-        temperatura, umidita = 10, 10 #misurazione.leggi() # Lettura sensore DHT
+        temperatura, umidita = misurazione.leggi() # Lettura sensore DHT
         
         print("[DEBUG]", "Invio da DC1 temperatura n.",letture,":", temperatura)
         print("[DEBUG]", "Invio da DC1 umidità n.",letture,":", umidita)

@@ -14,10 +14,10 @@ import cripto
 import paho.mqtt.client as mqtt
 
 # Creazione server DA 
-f = open("parametri.json")  
+f = open("parametri.conf")  
 dict = json.load(f)
 
-f_da = open("../da.json")
+f_da = open("../da.conf")
 dict_da = json.load(f_da)
 
 hostname = dict_da["IP"]

@@ -14,13 +14,13 @@ import archivia
 import threading
 import time
 
-# Parametri del file "iotp.json" (topic, dbfile)
-file = open("iotp.json") 
+# Parametri del file "iotp.conf" (topic, dbfile)
+file = open("iotp.conf") 
 dict = json.load(file)
 
 dict_db = dict["dbfile"]
 
-fileP = open("../DA/parametri.json")
+fileP = open("../DA/parametri.conf")
 dictP = json.load(fileP)
 
 TEMPO_INVIO = dictP["TEMPO_INVIO"]

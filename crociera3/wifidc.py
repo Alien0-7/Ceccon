@@ -9,10 +9,10 @@ import ubinascii              # Conversions between binary data and various enco
 import machine                # Funzioni relative all'HW utilizzato
 import time
 
-# Funzione che legge le credenziali del Wifi dal file "wifipico.json"
+# Funzione che legge le credenziali del Wifi dal file "wifipico.conf"
 def Parametri_WiFi():
     import json
-    with open('wifipico.json', 'r') as file:
+    with open('wifipico.conf', 'r') as file:
         credenziali = json.load(file)
         ssid = credenziali["ssid"]
         pasw = credenziali["pw"]
