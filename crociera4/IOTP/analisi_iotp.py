@@ -2,7 +2,7 @@
 Allegro Elena, Morari Elia 
 5AI
 
-Script analisi_iotp.py (QUery, calcolo media e deviazione standard)
+Script analisi_iotp.py (Query, calcolo media e deviazione standard)
 '''
 import json
 import pymongo
@@ -10,6 +10,7 @@ import math
 
 file = open("mongo.conf") 
 dict = json.load(file)
+
 # Prendo dal file di configurazione i parametri 
 uri = dict['uri']
 db_name = dict['database']
