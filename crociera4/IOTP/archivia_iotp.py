@@ -24,6 +24,7 @@ dict_db = dict["dbfile"]
 fileP = open("../DA/parametri.conf")
 dictP = json.load(fileP)
 
+# Parametri del database in Mongo
 fileMongo = open("mongo.conf") 
 dictMongo = json.load(file)
 
@@ -88,9 +89,10 @@ def on_messageIOT(client, userdata, msg):
     print("----------------------------------------------\n")
 
     # === INSERIMENTO IN MONGODB ===
+    # Inserimento dei dati nel database
     try:
         dato_per_mongo = json.loads(dato_decriptato)
-        collezione.insert_one(dato_per_mongo)
+        collezione.insert_one(dato_per_mongo) # Inserimento dentro "misure"
         print("[DEBUG]: dato inserito correttamente in MongoDB")
 
     except Exception as e:

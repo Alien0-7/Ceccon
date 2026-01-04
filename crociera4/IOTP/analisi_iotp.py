@@ -2,7 +2,7 @@
 Allegro Elena, Morari Elia 
 5AI
 
-Script analisi_iotp.py
+Script analisi_iotp.py (QUery, calcolo media e deviazione standard)
 '''
 import json
 import pymongo
@@ -10,15 +10,17 @@ import math
 
 file = open("mongo.conf") 
 dict = json.load(file)
+# Prendo dal file di configurazione i parametri 
 uri = dict['uri']
 db_name = dict['database']
 collezione = dict['collezione']
 
 client = pymongo.MongoClient(uri)
 
-db = client["Nave2025"]
-collezione = db["misure"]
+db = client["Nave2025"] # Nome Database 
+collezione = db["misure"] # Collezione 
 
+# Inserimento i dati della nave per cercare i suoi dati
 print("Inserisci i parametri di ricerca:")
 nave = input("Nome nave: ")
 giorno = int(input("Giorno (GG): "))
@@ -26,6 +28,7 @@ mese = int(input("Mese (MM): "))
 anno = int(input("Anno (AAAA): "))
 cabina = input("Cabina: ")
 
+# Query che viene fatta al database
 query = {
     "nave.nome": nave,
     "cabina": cabina,
@@ -35,6 +38,7 @@ query = {
     }
 }
 
+# Risultato della query 
 esito = collezione.find(query)
 
 if (esito):
@@ -46,10 +50,12 @@ if (esito):
 
     media_temp = 0.0
     media_umid = 0.0
+    # Prendo i dati della temperatura e dell'umidità
     for documento in lista_documenti:
         media_temp += documento["temperaturam"]
         media_umid += documento["umiditam"]
     
+    # Calcolo le varie medie 
     media_temp /= n_valori
     media_umid /= n_valori
 
@@ -59,6 +65,7 @@ if (esito):
     somma_quadrati_temp = 0.0
     somma_quadrati_umid = 0.0
 
+    # Faccio la deviazione standard dei dati della temperatura e dell'umidità
     for documento in lista_documenti:
         somma_quadrati_temp += (documento["temperaturam"] - media_temp) ** 2
         somma_quadrati_umid += (documento["umiditam"] - media_umid) ** 2
