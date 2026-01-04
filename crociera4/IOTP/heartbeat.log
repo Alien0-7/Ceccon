@@ -1,0 +1,12 @@
+{"timestamp": "2025-12-15T18:22:19Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:18:49Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
+{"timestamp": "2025-12-15T18:25:49Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:22:19Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
+{"timestamp": "2025-12-15T18:29:20Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:25:49Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
+{"timestamp": "2025-12-15T18:32:50Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:29:20Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
+{"timestamp": "2025-12-15T18:36:20Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:32:50Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
+{"timestamp": "2025-12-15T18:39:50Z", "level": "WARNING", "evento": "HEARTBEAT_TIMEOUT", "identita_da": "GIOT-EliaMorari", "codice": "108EX", "ultimo_heartbeat": "2025-12-15T18:36:20Z", "heartbeat_timeout_min": 8, "stato": "OFFLINE", "azione": "Notifica inviata"}
+
