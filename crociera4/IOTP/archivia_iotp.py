@@ -26,7 +26,7 @@ dictP = json.load(fileP)
 
 # Parametri del database in Mongo
 fileMongo = open("mongo.conf") 
-dictMongo = json.load(file)
+dictMongo = json.load(fileMongo)
 
 TEMPO_INVIO = dictP["TEMPO_INVIO"]
 
