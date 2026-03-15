@@ -1,0 +1,44 @@
+<!-- Allegro Elena, Morari Elia
+     5AI 
+     Pagina selezione cabine
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='stilenave.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="{{REFRESH}}" >
+    <title>Monitoraggio nave</title>
+</head>
+<body>
+
+<h2>COSTA SMERALDA</h2>
+<hr>
+
+<div style="margin: 10px 0;">
+    <button>Accendi</button>
+    <button>Spegni</button>
+</div>
+<hr>
+<h3>Cabine Attive</h3>
+
+{% if struttura %}
+    {% for ponte, cabine in struttura.items() %}
+    
+        <h4>Ponte {{ ponte }}</h4>
+        {% for cabina in cabine %}
+            <a href="{{ url_for('tr', PONTE=ponte, CABINA=cabina) }}">
+                <button>
+                    Cabina {{ cabina }}
+                </button>
+            </a>
+        {% endfor %}
+        <hr>
+    {% endfor %}
+
+{% else %}
+    <p>Nessun dato ricevuto ancora dal broker MQTT...</p>
+{% endif %}
+
+</body>
+</html>

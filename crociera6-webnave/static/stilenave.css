@@ -1,41 +1,106 @@
-   
-      body {
-        font-family: Georgia,Verdana;
-        text-align: center;
-        background: black;
-        color: white;
-        font-size: 1.1em;
-      }
-      #g1 {
-        width:300px; height:220px;
-        display: inline-block;
-        margin: 1em;
-      }
-      #g2 {
-        width:300px; height:220px;
-        display: inline-block;
-        margin: 1em;
-      }
-      p {
-        font-family: Arial,Verdana;
-        font-size: 0.8em;
-        display: block;
-        width: 600px;
-        margin: 1em auto;
-        text-align: left;
-        color: yellow;
-      }
-      hr {
-        display: block;
-        width: 600px;
-        border-color: white;
-      }
-      h2 {
-        font-family: Arial,Verdana;
-        font-size: 1.2em;
-        display: block;
-        width: 600px;
-        margin: 1em auto;
-        text-align: left;
-        color: yellow;
-      }
+/* --- Reset e font base --- */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background: #121212; /* nero scuro più moderno */
+    color: #f0f0f0;
+    font-size: 1.1em;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Contenitori dei gauge --- */
+#g1, #g2 {
+    width: 300px;
+    height: 220px;
+    display: inline-block;
+    margin: 1.5em;
+    border-radius: 15px;
+    background: #1f1f1f;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* --- Titoli e testo --- */
+h2 {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.4em;
+    margin: 1em auto;
+    color: #ffdd57; /* giallo caldo */
+    text-align: center;
+    text-shadow: 1px 1px 4px black;
+}
+
+h3 {
+    font-size: 1.2em;
+    color: #ffb347; /* arancione chiaro */
+    margin: 0.5em 0;
+}
+
+/* --- Paragrafi e info dei sensori --- */
+p {
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 0.9em;
+    display: block;
+    width: 650px;
+    margin: 0.8em auto;
+    text-align: left;
+    color: #ffeb99; /* giallo soft */
+    line-height: 1.4em;
+}
+
+/* --- Linee divisorie --- */
+hr {
+    display: block;
+    width: 650px;
+    border: 1px solid #555;
+    margin: 1.5em auto;
+}
+
+/* --- Pulsanti --- */
+button {
+    padding: 10px 25px;
+    font-size: 1em;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, #ff7e5f, #feb47b);
+    color: #121212;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+button:disabled {
+    background-color: #555;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* --- Pagina di alert --- */
+.alert-container {
+    text-align: center;
+    margin-top: 80px;
+}
+
+.alert-container h1 {
+    font-size: 60px;
+    color: #ff4c4c;
+    text-shadow: 2px 2px 8px black;
+}
+
+.alert-container h2 {
+    font-size: 24px;
+    color: #ffd700;
+}
+
+.alert-container p {
+    font-size: 18px;
+    color: #ffffff;
+}
+
+/* --- Immagine dell'alert --- */
+img {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
+}

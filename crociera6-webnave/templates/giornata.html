@@ -1,0 +1,55 @@
+<!-- Allegro Elena, Morari Elia
+     5AI
+     Pagina per il monitoraggio della media dei dati (temperatura e umidità))
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="{{ url_for('static', filename='stilenave.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="{{REFRESH}}">
+<title>Monitoraggio Giornata</title>
+</head>
+<body>
+
+<h2>COSTA SMERALDA</h2>
+<h2>Cabina {{ CABINA }} - Ponte {{ PONTE }}</h2>
+
+<hr>
+<p class="do">{{ ORARIO }}</p>
+<hr>
+<p>
+    Codice sensore: {{ IDSENSORE }}<br>
+    Tipo {{ TIPO }} - Produttore {{ PRODUTTORE }} - Modello: {{ MODELLO }}<br>
+</p>
+<h3>
+    MEDIA t<br>
+    {{ MEDIA_TEMP }} °C
+</h3>
+<h3>
+    MEDIA u<br>
+    {{ MEDIA_UMID }} %
+</h3>
+<hr>
+
+<div style="text-align:center; margin:20px 0;">
+    <button onclick="window.location.href='/temporeale/{{ PONTE }}/{{ CABINA }}'"
+        style="padding:10px 20px; font-size:16px; margin:5px; cursor:pointer;">
+        Tempo reale
+    </button>
+
+    <button disabled
+        style="padding:10px 20px; font-size:16px; margin:5px; background-color:gray; color:white; cursor:not-allowed;">
+        Storico
+    </button>
+
+    <button onclick="window.location.href='/'"
+        style="padding:10px 20px; font-size:16px; margin:5px; cursor:pointer;">
+        Cabina
+    </button>
+</div>
+
+<hr>
+<p>Aggiornamento ogni {{ REFRESH }} secondi.</p>
+</body>
+</html>

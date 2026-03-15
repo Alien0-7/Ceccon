@@ -1,84 +1,170 @@
+<!-- Allegro Elena, Morari Elia
+     5AI
+    Pagina di monitoraggio dei dati in tempo reale 
+-->
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='stilenave.css') }}">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="refresh" content="{{REFRESH}}" >
-       <title>Monitoraggio nave</title>
-    </head>
-    <body>
-    <h2>COSTA SMERALDA<br></h2>
-    <h2>Cabina {{CABINA}} - Ponte {{PONTE}}</h2>
-    <hr>
-    <p class=do>{{ORARIO}}</p>
-    <hr>
-    <p>
-        Codice sensore: {{IDSENSORE}}<BR>
-        Tipo {{TIPO}} - Produttore {{PRODUTTORE}} - Modello: {{MODELLO}}<BR>
-    </p>
-    <div id="g1"></div>
-    <div id="g2"></div>
-    <p>
-        Simulazione di un sistema di rilevamento della temperatura e dell’umidità
-        di una stanza di una casa, con invio dei dati tramite publisher MQTT in 
-        formato JSON e dashboarding in real-time mediante SPA Flask.
-    </p>
-    <p> Ricezione dallo script Python casa_dc_publisher.py, SPA Flask script casa_flask-subscriber
-        con utilizzo pagina HTML casa_mqtt_json.html e CSS dashboard_casa_mqtt_json.css
-    </p>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="{{ url_for('static', filename='stilenave.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="{{REFRESH}}">
+<title>Monitoraggio Tempo Reale</title>
+</head>
+<body>
+
+<h2>COSTA SMERALDA</h2>
+<h2>Cabina {{CABINA}} - Ponte {{PONTE}}</h2>
+
+<hr>
+<p class="do">{{ORARIO}}</p>
+<hr>
+
+<p>
+Codice sensore: {{IDSENSORE}}<br>
+Tipo {{TIPO}} - Produttore {{PRODUTTORE}} - Modello {{MODELLO}}
+</p>
+
+<div id="g1"></div>
+<div id="g2"></div>
+
+<hr>
+
+<div style="text-align:center; margin:20px 0;">
+
+<button onclick="window.location.href='/giornata/{{PONTE}}/{{CABINA}}'"
+style="padding:10px 20px; font-size:16px; margin:5px;">
+Giornata
+</button>
+
+<button disabled
+style="padding:10px 20px; font-size:16px; margin:5px; background-color:gray; color:white;">
+Storico
+</button>
+
+<button onclick="window.location.href='/'"
+style="padding:10px 20px; font-size:16px; margin:5px;">
+Cabine
+</button>
+
+</div>
+
 <script src="{{ url_for('static', filename='raphael-2.1.4.min.js') }}"></script>
 <script src="{{ url_for('static', filename='justgage.js') }}"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
-        var g1, g2;
-        var g1 = new JustGage({
-            id: "g1",
-            value: {{TEMP}},
-            min: 5,
-            max: 40,
-            title: "Temperatura",
-            levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
-            humanFriendly: true,
-            symbol: "°C",
-            formatNumber: true,
-            pointer: true,
-            valueFontColor: "white",
-            labelFontColor: "white",
-            pointerOptions: {
-                toplength: 20,
-                bottomlength: 20,
-                bottomwidth: 6,
-                color: '#8e8e93'
-           },
-        });
-        var g2 = new JustGage({
-            id: "g2",
-            value: {{UMID}},
-            min: 20,
-            max: 70,
-            title: "Umidità",
-            levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
-            humanFriendly: true,
-            donut: false,
-            pointer: true,
-            valueFontColor: "white",
-            labelFontColor: "white",
-            
-          pointerOptions: {
-              toplength: -15,
-              bottomlength: 10,
-              bottomwidth: 12,
-              color: 'blue',
-              stroke: '#ffffff',
-              stroke_width: 3,
-              stroke_linecap: 'round'
-            },
-          symbol: "%",
-          percents: true,
-        });
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    var temp = {{TEMP}};
+    var umid = {{UMID}};
+    var timestamp = {{TIMESTAMP}};
+
+    var ora_reale = Math.floor(Date.now()/1000);
+    var tempoSenzaDati = 40;
+
+    var tempMin = 10;
+    var tempMax = 33;
+
+    /* GAUGE */
+    var g1 = new JustGage({
+        id: "g1",
+        value: temp,
+        min: 5,
+        max: 40,
+        title: "Temperatura",
+        levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
+        humanFriendly: true,
+        symbol: "°C",
+        formatNumber: true,
+        pointer: true,
+        valueFontColor: "white",
+        labelFontColor: "white",
+        pointerOptions: {
+            toplength: 20,
+            bottomlength: 20,
+            bottomwidth: 6,
+            color: '#8e8e93'
+        },
     });
-    </script>
-    <hr>
-    <p>Aggiornamento ogni {{REFRESH}} secondi.</P>
+
+    var g2 = new JustGage({
+        id: "g2",
+        value: umid,
+        min: 20,
+        max: 80,
+        title: "Umidità",
+        levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
+        humanFriendly: true,
+        symbol: "%",
+        formatNumber: true,
+        pointer: true,
+        valueFontColor: "white",
+        labelFontColor: "white",
+        percents: true,
+        pointerOptions: {
+            toplength: 20,
+            bottomlength: 20,
+            bottomwidth: 6,
+            color: '#8e8e93',
+        },
+    });
+
+    /* ALERT TEMPERATURA */
+    if(temp < tempMin || temp > tempMax){
+        alert(
+        "Temperatura fuori range",
+        "Temperatura: " + temp + " °C"
+        );
+
+    }
+
+    /* ALERT DATI MANCANTI */
+    if((ora_reale - timestamp) > tempoSenzaDati){
+
+        alert(
+        "Nessun dato ricevuto da più di " + tempoSenzaDati + " secondi",
+        "Ultimo dato ricevuto alle: {{ORARIO}}"
+        );
+
+    }
+
+});
+
+/* FUNZIONE ALERT */
+
+function alert(titolo, messaggio){
+
+    document.body.style.backgroundColor = "#8B0000";
+    document.body.style.color = "white";
+
+    document.body.innerHTML = `
+    <div style="text-align:center;margin-top:100px;">
+        <img src="{{ url_for('static', filename='alert.png') }}">
+        <h1 style="font-size:60px;">ALLARME</h1>
+        <h2>${titolo}</h2>
+        <p>${messaggio}</p>
+    </div>
+
+    <div style="text-align:center;margin:20px 0;">
+
+        <button onclick="window.location.href='/giornata/{{PONTE}}/{{CABINA}}'"
+        style="padding:10px 20px;font-size:16px;margin:5px;">
+        Giornata
+        </button>
+
+        <button onclick="window.location.href='/'"
+        style="padding:10px 20px;font-size:16px;margin:5px;">
+        Cabine
+        </button>
+
+    </div>
+    `;
+}
+
+</script>
+
+<hr>
+<p>Aggiornamento ogni {{REFRESH}} secondi.</p>
+
 </body>
 </html>
