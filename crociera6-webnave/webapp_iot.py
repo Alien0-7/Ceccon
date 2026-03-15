@@ -19,7 +19,7 @@ mqtt = Mqtt(app)
 
 # Parametri applicazione
 refresh = 5
-TOPIC = "iotnavi/GIOT-EliaMorari/misure/+/+"
+TOPIC = "iotnavi/GIOT-ElenaAllegro/misure/+/+"
 
 # Strutture dati
 dati_per_ponte_cabina = {}

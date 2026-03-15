@@ -19,7 +19,7 @@ def on_umid():
 
 # Parametri
 BROKER_HOST = 'broker.emqx.io'                 # Indirizzo IP del broker MQTT (server Terra in LTR)
-TOPIC = "iotnavi/GIOT-EliaMorari/misure"        # Topic
+TOPIC = "iotnavi/GIOT-ElenaAllegro/misure"        # Topic
 PORTA_BROKER = 1883                            # Porta broker MQTT (default)
 QOS = 0                         # Qualità del servizio
 KEEPALIVE = 60                  # Intervallo massimo tra comunicaziioni con broker
