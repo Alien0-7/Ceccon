@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="../static/dashboard_casa_mqtt_json.css" rel="stylesheet" type="text/css">
+    <title>Monitoraggio casa - MQTT - JSON</title>
+    <meta http-equiv="refresh" content="{{REFRESH}}" >
+  </head>
+  <body>
+    <H2>Laboratorio LTR<BR>AS 2020_2021/v.2025<BR>IoT</H2>
+    <HR>
+    Stanza monitorata {{STANZA}}
+    <BR>
+    Rilevazione<BR>{{ORARIO}}
+    <HR>
+    <P>
+        Codice sensore: {{IDSENSORE}}<BR>
+        Tipo {{TIPO}} - Produttore {{PRODUTTORE}} - Modello: {{MODELLO}}<BR>
+    </P>
+    <HR>
+    <div id="g1"></div>
+    <div id="g2"></div>
+    <P>
+        Simulazione di un sistema di rilevamento della temperatura e dell’umidità
+        di una stanza di una casa, con invio dei dati tramite publisher MQTT in 
+        formato JSON e dashboarding in real-time mediante SPA Flask.
+    </P>
+    <P> Ricezione dallo script Python casa_dc_publisher.py, SPA Flask script casa_flask-subscriber
+        con utilizzo pagina HTML casa_mqtt_json.html e CSS dashboard_casa_mqtt_json.css
+    </P>
+<script src="{{ url_for('static', filename='raphael-2.1.4.min.js') }}"></script>
+<script src="{{ url_for('static', filename='justgage.js') }}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var g1, g2;
+        var g1 = new JustGage({
+            id: "g1",
+            value: {{TEMP}},
+            min: 5,
+            max: 40,
+            title: "Temperatura",
+            levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
+            humanFriendly: true,
+            symbol: "°C",
+            formatNumber: true,
+            pointer: true,
+            valueFontColor: "white",
+            labelFontColor: "white",
+            pointerOptions: {
+                toplength: 20,
+                bottomlength: 20,
+                bottomwidth: 6,
+                color: '#8e8e93'
+           },
+        });
+        var g2 = new JustGage({
+            id: "g2",
+            value: {{UMID}},
+            min: 20,
+            max: 70,
+            title: "Umidità",
+            levelColors: ["#00ff00", "#ffaa19", "#ff0000"],
+            humanFriendly: true,
+            donut: false,
+            pointer: true,
+            valueFontColor: "white",
+            labelFontColor: "white",
+            
+          pointerOptions: {
+              toplength: -15,
+              bottomlength: 10,
+              bottomwidth: 12,
+              color: 'blue',
+              stroke: '#ffffff',
+              stroke_width: 3,
+              stroke_linecap: 'round'
+            },
+          symbol: "%",
+          percents: true,
+        });
+    });
+    </script>
+    <HR>
+    <P>Aggiornamento ogni {{REFRESH}} secondi.</P>
+</body>
+</html>
+
