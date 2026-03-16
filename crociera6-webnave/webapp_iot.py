@@ -6,6 +6,9 @@ from flask import Flask, render_template
 from datetime import datetime
 from flask_mqtt import Mqtt
 import json
+import pymongo
+from datetime import datetime, timezone, timedelta
+
 
 # Creazione applicazione Flask
 app = Flask(__name__)
@@ -14,6 +17,15 @@ app = Flask(__name__)
 app.config['MQTT_BROKER_URL'] = 'broker.emqx.io'
 app.config['MQTT_BROKER_PORT'] = 1883
 app.config['MQTT_KEEPALIVE'] = 60
+
+# Parametri del database in Mongo
+fileMongo = open("mongo.conf") 
+dictMongo = json.load(fileMongo)
+
+# Connessione al database MongoDB
+client_mongo = pymongo.MongoClient(dictMongo["uri"])
+db = client_mongo[dictMongo["database"]]
+collezione = db[dictMongo["collezione"]]
 
 mqtt = Mqtt(app)
 
@@ -28,6 +40,7 @@ medie_per_ponte_cabina = {}
 # ROUTE PRINCIPALE DASHBOARD
 @app.route('/')
 def dashb():
+    ora_corrente = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     struttura = {}
 
     for ponte in sorted(dati_per_ponte_cabina.keys(), key=int):
@@ -38,6 +51,7 @@ def dashb():
 
     return render_template(
         "home_nave.html",
+        ORA=ora_corrente,
         struttura=struttura,
         REFRESH=refresh
     )
@@ -45,6 +59,8 @@ def dashb():
 # PAGINA TEMPO REALE
 @app.route('/temporeale/<PONTE>/<CABINA>')
 def tr(PONTE, CABINA):
+    ora_corrente = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    
     if PONTE in dati_per_ponte_cabina and CABINA in dati_per_ponte_cabina[PONTE]:
         Dati_per_template = dati_per_ponte_cabina[PONTE][CABINA].copy()
 
@@ -55,11 +71,9 @@ def tr(PONTE, CABINA):
             CABINA=CABINA,
             REFRESH=refresh
         )
+        
     Dati_per_template['REFRESH'] = refresh
-
-    data_ora = datetime.fromtimestamp(Dati_per_template['TIMESTAMP'])
-    formato = "%d-%m-%Y %H:%M:%S"
-    Dati_per_template['ORARIO'] = data_ora.strftime(formato)
+    Dati_per_template['ORA'] = ora_corrente
     Dati_per_template['PONTE'] = PONTE
     Dati_per_template['CABINA'] = CABINA
 
@@ -68,37 +82,61 @@ def tr(PONTE, CABINA):
 # PAGINA MEDIA GIORNALIERA
 @app.route('/giornata/<PONTE>/<CABINA>')
 def giornata(PONTE, CABINA):
-    if PONTE not in dati_per_ponte_cabina or CABINA not in dati_per_ponte_cabina[PONTE]:
+    ora_corrente = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    inizioOggi = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    inizioDomani = inizioOggi + timedelta(days=1)
+
+    # query MongoDB
+    risultati = collezione.find({
+        "PONTE": PONTE,
+        "CABINA": CABINA,
+        "TIMESTAMP": {
+	    "$gte": inizioOggi.timestamp(),
+	    "$lt": inizioDomani.timestamp()
+	}  
+    })
+
+    somma_temp = 0
+    somma_umid = 0
+    campioni = 0
+    idSensore = "null"
+    produttore = "null"
+    tipo = "null"
+    modello = "null"
+    for r in risultati:
+        somma_temp += float(r["TEMP"])
+        somma_umid += float(r["UMID"])
+        campioni += 1
+        if campioni == 1:
+          idSensore = r["IDSENSORE"] 
+          produttore = r["PRODUTTORE"]
+          tipo = r["TIPO"]
+          modello = r["MODELLO"]
         
-        return render_template(
-            'giornata.html',
-            PONTE=PONTE,
-            CABINA=CABINA,
-            REFRESH=refresh
-        )
 
-    Dati_per_template = dati_per_ponte_cabina[PONTE][CABINA].copy()
-    Dati_per_template['REFRESH'] = refresh
-
-    data_ora = datetime.fromtimestamp(Dati_per_template['TIMESTAMP'])
-    formato = "%d-%m-%Y %H:%M:%S"
-    Dati_per_template['ORARIO'] = data_ora.strftime(formato)
-    Dati_per_template['PONTE'] = PONTE
-    Dati_per_template['CABINA'] = CABINA
-
-    if PONTE in medie_per_ponte_cabina and CABINA in medie_per_ponte_cabina[PONTE]:
-        media = medie_per_ponte_cabina[PONTE][CABINA]
-
-        Dati_per_template['MEDIA_TEMP'] = media['media_temp']
-        Dati_per_template['MEDIA_UMID'] = media['media_umid']
-        Dati_per_template['CAMPIONI'] = media['campioni']
-
+    if campioni > 0:
+        media_temp = round(somma_temp / campioni, 2)
+        media_umid = round(somma_umid / campioni, 2)
     else:
-        Dati_per_template['MEDIA_TEMP'] = 0
-        Dati_per_template['MEDIA_UMID'] = 0
-        Dati_per_template['CAMPIONI'] = 0
+        media_temp = 0
+        media_umid = 0
 
-    return render_template('giornata.html', **Dati_per_template)
+    Dati_per_template = {
+        "PONTE": PONTE,
+        "CABINA": CABINA,
+        "MEDIA_TEMP": media_temp,
+        "MEDIA_UMID": media_umid,
+        "CAMPIONI": campioni,
+        "ORA": ora_corrente,
+        "REFRESH": refresh, 
+        "IDSENSORE": idSensore,
+        "TIPO": tipo,
+        "PRODUTTORE": produttore,
+        "MODELLO": modello
+    }
+
+    return render_template("giornata.html", **Dati_per_template)
 
 # MQTT CONNECT
 @mqtt.on_connect()
@@ -169,6 +207,18 @@ def gestione_message(client, userdata, message):
         }
 
     print("Media aggiornata:", medie_per_ponte_cabina[ponte][cabina])
+    
+    # === INSERIMENTO IN MONGODB ===
+    # Inserimento dei dati nel database
+    try:
+        dato_per_mongo = dati.copy()
+        dato_per_mongo["PONTE"] = ponte
+        dato_per_mongo["CABINA"] = cabina
+        collezione.insert_one(dato_per_mongo) # Inserimento dentro "misure"
+        print("[DEBUG]: dato inserito correttamente in MongoDB")
+
+    except Exception as e:
+        print("[ERRORE MongoDB]:", e)
 
 # MQTT DISCONNECT
 @mqtt.on_disconnect()

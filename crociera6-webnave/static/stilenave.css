@@ -93,7 +93,7 @@ button:disabled {
     color: #ffd700;
 }
 
-.alert-container p {
+.alert-container span {
     font-size: 18px;
     color: #ffffff;
 }

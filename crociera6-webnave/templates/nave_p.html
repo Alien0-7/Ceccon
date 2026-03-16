@@ -16,7 +16,7 @@
 <h2>Cabina {{CABINA}} - Ponte {{PONTE}}</h2>
 
 <hr>
-<p class="do">{{ORARIO}}</p>
+<span class="do">{{ORA}}</span>
 <hr>
 
 <p>
@@ -142,7 +142,7 @@ function alert(titolo, messaggio){
         <img src="{{ url_for('static', filename='alert.png') }}">
         <h1 style="font-size:60px;">ALLARME</h1>
         <h2>${titolo}</h2>
-        <p>${messaggio}</p>
+        <span>${messaggio}</span>
     </div>
 
     <div style="text-align:center;margin:20px 0;">
